@@ -1,19 +1,22 @@
 /*
  * Expected behaviour:
+ * 
  * - LED lights up solid for 3 seconds, then:
  * - Watchdog goes off every 1 second and triggers an interrupt --> 100 ms blink
  * - After 5 interrupts --> 3 blinks of 100 ms
  * - After the third time:
  *    - three more single blinks after a 1 second
  *    - then LED solid for 2 seconds
- *    - then silence for ever (watchdog disable, MCU sleeps, no wakeup)
+ *    - then silence forever (watchdog disabled --> no more interrupts, MCU sleeps, no wakeup)
  *    
  * Demonstrates to ways of configuring watchdog interrupts
+ * 
  * - Option A: via wdt_enable(..), which sets WDE = 1, and resetting WDIE = 1 after each "last-chance" interrupt
  * - Option B: via a custom procedure that sets WDE = 0
 
  * Option C is independent of WDT control-register name which varies across AVR processors
- * Use #define USE_WDT_ENABLE  to control which options is used
+ * 
+ * Use #define USE_WDT_ENABLE to choose option
  */
 #include <avr/sleep.h>
 #include <avr/wdt.h>
