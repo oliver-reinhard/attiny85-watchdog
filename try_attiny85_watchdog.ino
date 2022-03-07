@@ -9,10 +9,11 @@
  *    - then silence for ever (watchdog disable, MCU sleeps, no wakeup)
  *    
  * Demonstrates to ways of configuring watchdog interrupts
- * - Alternative A: via a custom procedure that sets WDE = 0
- * - Alternative B: via wdt_enable(..), which sets WDE = 1, and resetting WDIE = 1 after each "last-chance" interrupt
- * 
- * Alternative B is independent of WDT control-register name which varies across AVR processors
+ * - Option A: via wdt_enable(..), which sets WDE = 1, and resetting WDIE = 1 after each "last-chance" interrupt
+ * - Option B: via a custom procedure that sets WDE = 0
+
+ * Option C is independent of WDT control-register name which varies across AVR processors
+ * Use #define USE_WDT_ENABLE  to control which options is used
  */
 #include <avr/sleep.h>
 #include <avr/wdt.h>
