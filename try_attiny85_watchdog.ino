@@ -97,16 +97,16 @@ void disable_watchdog() {
 }
 
 void turnOnLED(uint32_t ms) {
-  PORTB |= _BV(FLASHING_LED_PIN);
+  digitalWrite(FLASHING_LED_PIN, HIGH);
   delay(ms);
-  PORTB &= ~_BV(FLASHING_LED_PIN);
+  digitalWrite(FLASHING_LED_PIN, LOW);
 }
   
 void flashLED(uint8_t times) {
   for (uint8_t i = 0; i < times; i++) {
-    PORTB |= _BV(FLASHING_LED_PIN);
+    digitalWrite(FLASHING_LED_PIN, HIGH);
     delay(100);
-    PORTB &= ~_BV(FLASHING_LED_PIN);
+    digitalWrite(FLASHING_LED_PIN, LOW);
     delay(100);
   }
 }
