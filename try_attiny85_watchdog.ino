@@ -35,7 +35,7 @@
 
 #define USE_WDT_ENABLE
 
-const uint8_t FLASHING_LED_PIN = PB0;     // digital: out (LED — PB0 is the built-in on ATtiny85 programmer)
+const uint8_t FLASHING_LED_PIN = PD5;     // digital: out (LED — PB0 is the built-in on ATtiny85 programmer)
 
 uint8_t watchdog_counter = 0;
 uint8_t watchdog_disable_countdown = 3;
@@ -48,7 +48,7 @@ void setup() {
   #ifdef USE_WDT_ENABLE
     // Must reset WDIE after each interrupt!!
     wdt_enable(WDTO_1S);
-    WDTCR |= _BV(WDIE);
+    _WD_CONTROL_REG |= _BV(WDIE);
     sei();
 
   #else
@@ -77,7 +77,7 @@ ISR(WDT_vect) {
   watchdog_counter++;
   flashLED(1); 
   #ifdef USE_WDT_ENABLE
-    WDTCR |= _BV(WDIE);
+    _WD_CONTROL_REG |= _BV(WDIE);
   #endif
 }
 
@@ -85,8 +85,8 @@ ISR(WDT_vect) {
   void setup_watchdog(uint8_t timeoutBitmask){
     cli();
     wdt_reset();                                                  // Reset counter to zero
-    WDTCR  = (1<<WDIE) | (0<<WDE) | timeoutBitmask;               // Enable interrupt, no system reset
-    // WDTCR  = (1<<WDIE) | (0<<WDE) | (1<<WDP2) | (1<<WDP1);     // Alternative, 1 second
+    _WD_CONTROL_REG  = (1<<WDIE) | (0<<WDE) | timeoutBitmask;               // Enable interrupt, no system reset
+    // _WD_CONTROL_REG  = (1<<WDIE) | (0<<WDE) | (1<<WDP2) | (1<<WDP1);     // Alternative, 1 second
     sei();
   }
 #endif
