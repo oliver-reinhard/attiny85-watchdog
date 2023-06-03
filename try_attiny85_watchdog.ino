@@ -22,7 +22,7 @@
 
  * Option A is independent of WDT control-register name which varies across AVR processors.
  * 
- * Make use of #define USE_WDT_ENABLE to choose option
+ * Make use of #define OPTION_A_USE_WDT_ENABLE to choose option
  * 
  * Oliver Reinhard, 2022
  * 
@@ -33,9 +33,9 @@
 #include <avr/sleep.h>
 #include <avr/wdt.h>
 
-#define USE_WDT_ENABLE
+#define OPTION_A_USE_WDT_ENABLE  // remove / comment this line for option B
 
-const uint8_t FLASHING_LED_PIN = PD5;     // digital: out (LED — PB0 is the built-in on ATtiny85 programmer)
+const uint8_t FLASHING_LED_PIN = PB5;     // digital: out (LED — PB0 is the built-in on ATtiny85 programmer)
 
 uint8_t watchdog_counter = 0;
 uint8_t watchdog_disable_countdown = 3;
@@ -45,7 +45,7 @@ void setup() {
   turnOnLED(3000);
   disable_watchdog();
 
-  #ifdef USE_WDT_ENABLE
+  #ifdef OPTION_A_USE_WDT_ENABLE
     // Must reset WDIE after each interrupt!!
     wdt_enable(WDTO_1S);
     _WD_CONTROL_REG |= _BV(WDIE);
@@ -57,7 +57,12 @@ void setup() {
 }
 
 void loop() {
-  sleep_mode(); // Blocking sleep ("idle" mode by default)
+  //  sleep_mode(); // Blocking sleep ("idle" mode by default)
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+  sei();
+  sleep_cpu();      // Controller waits for interrupt here
+  sleep_disable();
 
   if(watchdog_counter >= 5)   {
     flashLED(3);
@@ -72,16 +77,19 @@ void loop() {
 }
 
 
-//This runs each time the watch dog wakes us up from sleep
+// This runs each time the watch dog wakes us up from sleep
 ISR(WDT_vect) {
   watchdog_counter++;
   flashLED(1); 
-  #ifdef USE_WDT_ENABLE
+  #ifdef OPTION_A_USE_WDT_ENABLE
     _WD_CONTROL_REG |= _BV(WDIE);
   #endif
 }
 
- #ifndef USE_WDT_ENABLE
+ #ifndef OPTION_A_USE_WDT_ENABLE
+  //
+  // THIS IS OPTION B:
+  //
   void setup_watchdog(uint8_t timeoutBitmask){
     cli();
     wdt_reset();                                                  // Reset counter to zero
@@ -92,7 +100,7 @@ ISR(WDT_vect) {
 #endif
 
 void disable_watchdog() {
-  MCUSR &= ~_BV(WDRF); // see commend in ATtiny85 Datasheet, p.46, Note under "Bit 3 – WDE: Watchdog Enable" 
+  MCUSR &= ~_BV(WDRF); // see comment in ATtiny85 Datasheet, p.46, Note under "Bit 3 – WDE: Watchdog Enable" 
   wdt_disable();
 }
 
